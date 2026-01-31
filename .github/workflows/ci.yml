@@ -6,11 +6,28 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
 
-      - name: Run tests
-        run: pytest
+      - name: Run tests and capture CI logs
+        id: pytest_step
+        run: |
+          pytest > ci_logs.txt 2>&1
+        continue-on-error: true
+
+      - name: Run CI Hygiene Agent (MCP)
+        if: failure()
+        run: |
+          python mcp_server/server.py --ci-log ci_logs.txt
