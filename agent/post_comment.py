@@ -20,7 +20,7 @@ def post_fix_comment(pr_number: int, log_path: str = "ci_logs.txt"):
     diagnosis = analyze_ci_failure(logs)
 
     # Build comment body
-    comment = f"""🤖 **DietCode CI Agent — Fix Suggestion**
+    comment = f"""**DietCode CI Agent — Fix Suggestion**
 
 ---
 **What failed:** {diagnosis.get('failure_type', 'Unknown')}
@@ -44,9 +44,9 @@ def post_fix_comment(pr_number: int, log_path: str = "ci_logs.txt"):
     response = requests.post(url, json={"body": comment}, headers=headers)
 
     if response.status_code == 201:
-        print(f"✅ Comment posted on PR #{pr_number}")
+        print(f"Comment posted on PR #{pr_number}")
     else:
-        print(f"❌ Failed to post comment: {response.status_code} — {response.text}")
+        print(f"Failed to post comment: {response.status_code} — {response.text}")
 
 if __name__ == "__main__":
     import sys
