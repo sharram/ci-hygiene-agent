@@ -31,4 +31,4 @@ jobs:
           echo "GITHUB_TOKEN=$GITHUB_TOKEN" > .env
           echo "GITHUB_OWNER=$GITHUB_OWNER" >> .env
           echo "GITHUB_REPO=$GITHUB_REPO" >> .env
-          python agent/post_comment.py $PR_NUMBER
+          python -m agent.post_comment $PR_NUMBER
