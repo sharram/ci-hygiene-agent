@@ -1,17 +1,26 @@
+def analyze_ci_failure(ci_log: str) -> dict:
+    """
+    Analyze CI logs and return diagnosis and fix suggestion.
+    """
 
-def analyze_ci_log(log_text):
-    if "No module named" in log_text:
-        missing_module = log_text.split("No module named")[-1].strip().strip("'\"")
+    if "No module named" in ci_log:
+        missing_module = (
+            ci_log.split("No module named")[-1]
+            .strip()
+            .strip("'\"")
+            .split()[0]
+        )
+
         return {
-            "error_type": "Missing Dependency",
-            "root_cause": f"{missing_module} is imported but not listed in requirements.txt",
-            "suggested_fix": f"Add {missing_module} to requirements.txt",
+            "failure_type": "Missing Dependency",
+            "root_cause": f"Module '{missing_module}' is imported but not declared in requirements.txt",
+            "suggested_patch": f"Add '{missing_module}' to requirements.txt",
             "confidence": 0.95
         }
 
     return {
-        "error_type": "Unknown",
-        "root_cause": "Could not classify error",
-        "suggested_fix": "Manual inspection required",
+        "failure_type": "Unknown",
+        "root_cause": "CI failure could not be classified automatically",
+        "suggested_patch": "Manual inspection required",
         "confidence": 0.2
     }
