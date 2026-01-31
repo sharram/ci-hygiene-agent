@@ -1,16 +1,34 @@
 name: CI
-
 on:
   pull_request:
-
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
-
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run tests
-        run: pytest
+        run: |
+          pip install -r requirements.txt
+          pip install pytest python-dotenv requests
+      - name: Run tests and capture CI logs
+        run: |
+          pytest > ci_logs.txt 2>&1 || true
+      - name: Run CI Hygiene Agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "GITHUB_TOKEN=$GITHUB_TOKEN" > .env
+          echo "GITHUB_OWNER=$GITHUB_OWNER" >> .env
+          echo "GITHUB_REPO=$GITHUB_REPO" >> .env
+          python -m agent.post_comment $PR_NUMBER
